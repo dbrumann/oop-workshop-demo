@@ -2,9 +2,11 @@
 
 namespace App\Entity;
 
+use App\Price\Currency;
+use App\Price\CurrencyFactory;
+use App\Price\Price;
 use App\Repository\ProductRepository;
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: ProductRepository::class)]
 #[ORM\Table(name: 'store_products')]
@@ -16,20 +18,24 @@ class Product
     private readonly int $id;
 
     #[ORM\Column(name: 'name', type: 'string', length: 100)]
-    #[Assert\Length(min: 2, max: 100)]
     private string $name;
 
     #[ORM\Column(name: 'description', type: 'text')]
-    #[Assert\Length(min: 5)]
     private string $description;
 
     #[ORM\Column(name: 'amount', type: 'integer')]
-    #[Assert\PositiveOrZero()]
     private int $amount;
 
     #[ORM\Column(name: 'currency', type: 'string', length: 4)]
-    #[Assert\Choice(choices: ['EUR', 'USD'])]
     private string $currency;
+
+    public function __construct(string $name, string $description, Price $price)
+    {
+        $this->name = $name;
+        $this->description = $description;
+        $this->amount = $price->getAmount();
+        $this->currency = (string) $price->getCurrency();
+    }
 
     public function getId(): int
     {
@@ -46,33 +52,8 @@ class Product
         return $this->description;
     }
 
-    public function getAmount(): int
+    public function getPrice(): Price
     {
-        return $this->amount;
-    }
-
-    public function getCurrency(): string
-    {
-        return $this->currency;
-    }
-
-    public function setName(string $name): void
-    {
-        $this->name = $name;
-    }
-
-    public function setDescription(string $description): void
-    {
-        $this->description = $description;
-    }
-
-    public function setAmount(int $amount): void
-    {
-        $this->amount = $amount;
-    }
-
-    public function setCurrency(string $currency): void
-    {
-        $this->currency = $currency;
+        return new Price($this->amount, CurrencyFactory::new($this->currency));
     }
 }

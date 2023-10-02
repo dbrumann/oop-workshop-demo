@@ -89,3 +89,36 @@ The Product entity (`src/Entity/Product.php`) is an anemic model. Instead, we wa
 
 Note: When making the entity into a rich model, the form for creating a product will likely no longer work.
 If you have time, fix this as well.
+
+### Task 3: Creational patterns
+
+- There are some design smells in our factories, find them and fix them
+- ProductBuilder via container is a shared instance (i.e. treated as singleton),
+  see `\App\Tests\Product\ProductBuilderTest::testBuilderFromContainerIsNotShared`. How can we fix this?
+
+### Task 4: Facade
+
+Product creation is somewhat complex (input validation, object creation, persistence). A facade will help make our
+controllers slimmer and hide this complexity.
+
+- Create a facade, which will work both for the admin and api action.
+- (optional) Apply the dependency inversion principle to the validator being used by the facade, i.e. create your own
+  app-specific ProductValidator
+
+### Task 5: Chain of Responsibility
+
+- Create a DataMapper for mapping data from one object to another utilizing the Chain of Responsibility pattern
+    - Example: `$product = $dataMapper->map($productDto, Product::class);`
+    - Register the factories with the mapper
+    - (optional) Ensure the PriceFactory can map the currency code to a Currency-object without explicitly utilizing
+      the CurrencyFactory and similarly the ProductFactory should not explicitly be tied to the PriceFactory (tip: Mediator)
+
+### Task 6: State
+
+There is no good way of differentiating different product states, e.g. "draft", "published", "discontinued". Apply the
+State pattern to the product
+
+- Add a state to the product
+  - Update schema (make sure to run the appropriate db-commands)
+  - Update fixtures, DTO and form to handle state
+  - Show product state in templates
