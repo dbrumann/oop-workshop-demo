@@ -1,0 +1,12 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <h1>Create a new product</h1>
+    {{ form_start(create_form, {'action': path('admin_products_new')}) }}
+        {{ form_row(create_form.name) }}
+        {{ form_row(create_form.amount) }}
+        {{ form_row(create_form.currency) }}
+        {{ form_row(create_form.description) }}
+        <button type="submit">submit</button>
+    {{ form_end(create_form) }}
+{% endblock %}

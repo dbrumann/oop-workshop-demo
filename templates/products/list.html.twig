@@ -1,0 +1,15 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <h1>Products</h1>
+    <p><a href="{{ path('admin_products_new') }}">Create a new product</a></p>
+    <div class="list products">
+        {% for product in products %}
+        <div class="item product">
+            <h3>{{ product.name }}</h3>
+            <strong>{{ (product.amount/100)|round(2) }} {{ product.currency }}</strong>
+            <p>{{ product.description }}</p>
+        </div>
+        {% endfor %}
+    </div>
+{% endblock %}
