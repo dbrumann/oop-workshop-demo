@@ -2,6 +2,7 @@
 
 namespace App\Controller\Api\Product;
 
+use App\Product\ProductCreatorFacade;
 use App\Product\ProductDto;
 use App\Product\ProductFactory;
 use Doctrine\ORM\EntityManagerInterface;
@@ -16,28 +17,16 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 class CreateProductController
 {
     public function __construct(
-        private readonly ValidatorInterface $validator,
         private readonly SerializerInterface $serializer,
-        private readonly EntityManagerInterface $entityManager,
-        private readonly ProductFactory $productFactory,
+        private readonly ProductCreatorFacade $productCreator,
     ) {}
 
     #[Route(path: '/api/products', name: 'api_products_new', methods: ['POST'])]
     public function __invoke(Request $request): JsonResponse
     {
         $productDto = $this->serializer->deserialize($request->getContent(), ProductDto::class, 'json');
-        $errors = $this->validator->validate($productDto);
-        if (count($errors) > 0) {
-            return JsonResponse::fromJsonString(
-                data: $this->serializer->serialize($errors, 'json'),
-                status: JsonResponse::HTTP_BAD_REQUEST
-            );
-        }
 
-        $product = $this->productFactory->create($productDto);
-
-        $this->entityManager->persist($product);
-        $this->entityManager->flush();
+        $product = $this->productCreator->create($productDto);
 
         return JsonResponse::fromJsonString(
             data: $this->serializer->serialize($product, 'json'),
