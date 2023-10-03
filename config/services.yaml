@@ -23,5 +23,18 @@ services:
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
 
-    App\Product\ProductBuilder:
-        public: true # required for our functional test, todo: move to services_test.yaml
+    app.price.price_factory.eur:
+        class: App\Price\StaticCurrencyFactory
+        arguments:
+            $code: 'EUR'
+
+    app.price.price_factory.usd:
+        class: App\Price\StaticCurrencyFactory
+        arguments:
+            $code: 'USD'
+
+    App\Price\CurrencyLocator:
+        arguments:
+            - !service_locator
+                app.price.price_factory.eur: '@app.price.price_factory.eur'
+                app.price.price_factory.usd: '@app.price.price_factory.usd'

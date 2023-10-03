@@ -8,7 +8,7 @@ class Currency implements \Stringable
 {
     private readonly string $code;
 
-    private function __construct(string $code)
+    public function __construct(string $code)
     {
         $this->code = u($code)->upper()->toUnicodeString();
     }

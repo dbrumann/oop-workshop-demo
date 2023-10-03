@@ -2,20 +2,22 @@
 
 namespace App\Tests\Price;
 
-use App\Price\CurrencyFactory;
+use App\Price\StaticCurrencyFactory;
 use PHPUnit\Framework\TestCase;
 
 class CurrencyFactoryTest extends TestCase
 {
     public function testCreatesCurrency(): void
     {
-        $currency = CurrencyFactory::new('EUR');
+        $factory = new StaticCurrencyFactory('EUR');
 
-        self::assertSame('EUR', (string) $currency);
+        self::assertSame('EUR', (string) $factory->create());
     }
 
     public function testCreatedCurrencyIsSingleton(): void
     {
-        self::assertSame(CurrencyFactory::new('EUR'), CurrencyFactory::new('EUR'));
+        $factory = new StaticCurrencyFactory('EUR');
+
+        self::assertSame($factory->create(), $factory->create());
     }
 }

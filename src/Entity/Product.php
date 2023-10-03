@@ -3,8 +3,8 @@
 namespace App\Entity;
 
 use App\Price\Currency;
-use App\Price\CurrencyFactory;
-use App\Price\Price;
+use App\Price\StaticCurrencyFactory;
+use App\Entity\Price;
 use App\Repository\ProductRepository;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -23,18 +23,14 @@ class Product
     #[ORM\Column(name: 'description', type: 'text')]
     private string $description;
 
-    #[ORM\Column(name: 'amount', type: 'integer')]
-    private int $amount;
-
-    #[ORM\Column(name: 'currency', type: 'string', length: 4)]
-    private string $currency;
+    #[ORM\Embedded(class: Price::class, columnPrefix: false)]
+    private Price $price;
 
     public function __construct(string $name, string $description, Price $price)
     {
         $this->name = $name;
         $this->description = $description;
-        $this->amount = $price->getAmount();
-        $this->currency = (string) $price->getCurrency();
+        $this->price = $price;
     }
 
     public function getId(): int
@@ -54,6 +50,6 @@ class Product
 
     public function getPrice(): Price
     {
-        return new Price($this->amount, CurrencyFactory::new($this->currency));
+        return $this->price;
     }
 }

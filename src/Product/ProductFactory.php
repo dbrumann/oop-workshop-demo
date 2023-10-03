@@ -4,6 +4,7 @@ namespace App\Product;
 
 use App\Entity\Product;
 use App\Price\PriceFactory;
+use function Symfony\Component\String\b;
 
 class ProductFactory
 {

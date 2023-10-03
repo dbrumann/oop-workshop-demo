@@ -2,17 +2,23 @@
 
 namespace App\Tests\Product;
 
+use App\Price\CurrencyLocator;
 use App\Price\PriceFactory;
+use App\Price\StaticCurrencyFactory;
 use App\Product\ProductBuilder;
 use App\Product\ProductFactory;
-use PHPUnit\Framework\TestCase;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
+use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\DependencyInjection\Exception\ServiceNotFoundException;
 
 class ProductBuilderTest extends KernelTestCase
 {
     public function testBuildsProduct(): void
     {
-        $builder = new ProductBuilder(new ProductFactory(new PriceFactory('USD')));
+        $container = new ContainerBuilder();
+        $container->set('app.price.price_factory.eur', new StaticCurrencyFactory('EUR'));
+        $container->set('app.price.price_factory.usd', new StaticCurrencyFactory('USD'));
+        $builder = new ProductBuilder(new ProductFactory(new PriceFactory(new CurrencyLocator($container), 'EUR')));
         $product = $builder
             ->withName('My built product')
             ->withDescription('Product generated through the builder')
@@ -26,24 +32,12 @@ class ProductBuilderTest extends KernelTestCase
         self::assertSame('EUR', (string) $product->getPrice()->getCurrency());
     }
 
-    public function testBuilderFromContainerIsNotShared(): void
+    public function testBuilderIsNeverInjectedAsService(): void
     {
-        $this->markTestSkipped('Bonus Task: How can we make sure our builder is not reused?');
-
         self::bootKernel();
 
-        $builder = self::getContainer()->get(ProductBuilder::class);
-        $builder
-            ->withName('My built product')
-            ->withDescription('Product generated through the builder')
-            ->withAmount(1323)
-            ->withCurrency('EUR')
-            ->build();
+        $this->expectException(ServiceNotFoundException::class);
 
-        $builder = self::getContainer()->get(ProductBuilder::class);
-
-        $this->expectException(\Error::class);
-
-        $builder->build();
+        self::getContainer()->get(ProductBuilder::class);
     }
 }
